@@ -233,6 +233,26 @@
             }
           ]
         }
+      },
+      {
+        "path": "/users/{userId}/inventory/{inventoryId}",
+        "definition": {
+          "entityName": "InventoryItem",
+          "schema": {
+            "$ref": "#/backend/entities/InventoryItem"
+          },
+          "description": "Stores inventory items for the user. Each item is associated with a specific user ID, enforcing path-based ownership.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "inventoryId",
+              "description": "The unique identifier of the inventory item."
+            }
+          ]
+        }
       }
     ],
     "reasoning": "The Firestore data structure is designed to securely store user-specific accounting data, including invoices, expenses, and reports. It leverages path-based ownership for data isolation and simplified security rules, ensuring only the authenticated user can access their own data. By structuring the data in this way, we achieve Authorization Independence. Each collection is namespaced under the user's ID, removing the need for complex `get()` calls in security rules, which could hinder atomic operations. All list operations are secure via path-based ownership, thus satisfying the QAPs.\n\nThe structure also supports the invariant that only the user owns the records."
