@@ -28,7 +28,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey: string;
-  createFormComponent?: React.ComponentType;
+  createFormComponent?: React.ComponentType<{ setOpen: (open: boolean) => void }>;
 }
 
 export function DataTable<TData, TValue>({

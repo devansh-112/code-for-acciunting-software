@@ -1,9 +1,19 @@
+'use client';
+
+import { useState } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
-import { inventoryItems } from '@/lib/data';
+import { inventoryItems as initialInventory } from '@/lib/data';
 import { columns } from './columns';
 import { CreateInventoryItemForm } from '@/components/forms/create-inventory-item-form';
+import { InventoryItem } from '@/lib/types';
 
 export default function InventoryPage() {
+  const [inventoryItems, setInventoryItems] = useState(initialInventory);
+
+  const addInventoryItem = (item: InventoryItem) => {
+    setInventoryItems(prev => [...prev, item]);
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -14,7 +24,12 @@ export default function InventoryPage() {
           Track and manage your product inventory.
         </p>
       </div>
-      <DataTable columns={columns} data={inventoryItems} searchKey="name" createFormComponent={CreateInventoryItemForm} />
+      <DataTable 
+        columns={columns} 
+        data={inventoryItems} 
+        searchKey="name" 
+        createFormComponent={(props) => <CreateInventoryItemForm {...props} onSubmit={addInventoryItem} />}
+      />
     </div>
   );
 }

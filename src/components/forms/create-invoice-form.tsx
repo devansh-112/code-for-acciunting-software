@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Invoice } from "@/lib/types"
 
 const formSchema = z.object({
   customer: z.string().min(1, "Customer name is required"),
@@ -25,7 +26,12 @@ const formSchema = z.object({
   date: z.string().min(1, "Date is required"),
 })
 
-export function CreateInvoiceForm() {
+type CreateInvoiceFormProps = {
+  setOpen: (open: boolean) => void;
+  onSubmit: (values: Omit<Invoice, 'id'>) => void;
+};
+
+export function CreateInvoiceForm({ setOpen, onSubmit }: CreateInvoiceFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,14 +43,15 @@ export function CreateInvoiceForm() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    // Here you would typically handle form submission, e.g., send data to your server
+  function handleFormSubmit(values: z.infer<typeof formSchema>) {
+    onSubmit(values);
+    form.reset();
+    setOpen(false);
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="customer"

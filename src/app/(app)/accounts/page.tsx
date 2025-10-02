@@ -1,9 +1,19 @@
+'use client';
+
+import { useState } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
-import { accounts } from '@/lib/data';
+import { accounts as initialAccounts } from '@/lib/data';
 import { columns } from './columns';
 import { CreateAccountForm } from '@/components/forms/create-account-form';
+import { Account } from '@/lib/types';
 
 export default function AccountsPage() {
+  const [accounts, setAccounts] = useState(initialAccounts);
+
+  const addAccount = (account: Omit<Account, 'id'>) => {
+    setAccounts(prev => [...prev, { ...account, id: `ACC-${Date.now()}` }]);
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -14,7 +24,12 @@ export default function AccountsPage() {
           Manage your assets, liabilities, equity, revenue, and expenses.
         </p>
       </div>
-      <DataTable columns={columns} data={accounts} searchKey="name" createFormComponent={CreateAccountForm} />
+      <DataTable 
+        columns={columns} 
+        data={accounts} 
+        searchKey="name" 
+        createFormComponent={(props) => <CreateAccountForm {...props} onSubmit={addAccount} />}
+      />
     </div>
   );
 }

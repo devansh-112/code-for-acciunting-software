@@ -10,7 +10,7 @@ import React from 'react';
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   searchKey: string;
-  createFormComponent?: React.ComponentType;
+  createFormComponent?: React.ComponentType<{ setOpen: (open: boolean) => void }>;
 }
 
 export function DataTableToolbar<TData>({
@@ -44,7 +44,7 @@ export function DataTableToolbar<TData>({
             <DialogHeader>
               <DialogTitle>Add New</DialogTitle>
             </DialogHeader>
-            <CreateFormComponent />
+            <CreateFormComponent setOpen={setOpen} />
           </DialogContent>
         </Dialog>
       )}
