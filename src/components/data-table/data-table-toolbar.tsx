@@ -14,17 +14,16 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   searchKey: string;
   createFormComponent?: React.ComponentType<{ setOpen: (open: boolean) => void, inventoryItems?: InventoryItem[] }>;
-  formProps?: any;
+  inventoryItems?: InventoryItem[]; // Add inventoryItems to props
 }
 
 export function DataTableToolbar<TData>({
   table,
   searchKey,
   createFormComponent: CreateFormComponent,
-  formProps
+  inventoryItems
 }: DataTableToolbarProps<TData>) {
   const [open, setOpen] = React.useState(false);
-  const dataForForm = searchKey === 'billedTo' ? formProps.inventoryItems : table.options.data;
 
   return (
     <div className="flex items-center justify-between">
@@ -50,7 +49,7 @@ export function DataTableToolbar<TData>({
             <DialogHeader>
               <DialogTitle>Add New</DialogTitle>
             </DialogHeader>
-            <CreateFormComponent setOpen={setOpen} inventoryItems={dataForForm} {...formProps} />
+            <CreateFormComponent setOpen={setOpen} inventoryItems={inventoryItems} />
           </DialogContent>
         </Dialog>
       )}

@@ -32,6 +32,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   searchKey: string;
   createFormComponent?: React.ComponentType<{ setOpen: (open: boolean) => void, inventoryItems?: InventoryItem[] }>;
+  inventoryItems?: InventoryItem[]; // Add this prop
 }
 
 export function DataTable<TData, TValue>({
@@ -39,6 +40,7 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
   createFormComponent,
+  inventoryItems, // Destructure the prop
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -58,18 +60,13 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const formProps: any = {};
-  if (createFormComponent?.name === 'CreateInvoiceForm') {
-    formProps.inventoryItems = data;
-  }
-
   return (
     <div className="space-y-4">
       <DataTableToolbar 
           table={table} 
           searchKey={searchKey} 
           createFormComponent={createFormComponent} 
-          formProps={{ inventoryItems: data }} // Pass data directly
+          inventoryItems={inventoryItems} // Pass it down
       />
       <div className="rounded-md border bg-card">
         <Table>

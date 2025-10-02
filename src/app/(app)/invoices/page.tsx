@@ -6,12 +6,13 @@ import { getColumns } from './columns';
 import { CreateInvoiceForm } from '@/components/forms/create-invoice-form';
 import { useInvoiceContext } from '@/lib/context/invoice-context';
 import { useInventoryContext } from '@/lib/context/inventory-context';
+import { Invoice } from '@/lib/types';
 
 export default function InvoicesPage() {
   const { invoices, addInvoice, deleteInvoice } = useInvoiceContext();
   const { inventoryItems } = useInventoryContext();
 
-  const handleAddInvoice = (invoice: Omit<import("@/lib/types").Invoice, "id">) => {
+  const handleAddInvoice = (invoice: Omit<Invoice, "id">) => {
     addInvoice(invoice);
   };
   
@@ -31,7 +32,8 @@ export default function InvoicesPage() {
         columns={columns} 
         data={invoices} 
         searchKey="billedTo" 
-        createFormComponent={(props) => <CreateInvoiceForm {...props} onSubmit={handleAddInvoice} inventoryItems={inventoryItems} />}
+        createFormComponent={(props) => <CreateInvoiceForm {...props} onSubmit={handleAddInvoice} />}
+        inventoryItems={inventoryItems}
       />
     </div>
   );
