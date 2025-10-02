@@ -33,14 +33,24 @@ export function DataTableRowActions<TData>({
     doc.text(`Invoice ID: ${invoice.id}`, 20, 30);
     doc.text(`Customer: ${invoice.customer}`, 20, 40);
     doc.text(`Email: ${invoice.email}`, 20, 50);
-    doc.text(`Date: ${invoice.date}`, 20, 60);
-    doc.text(`Status: ${invoice.status}`, 20, 70);
+    if (invoice.gstin) {
+      doc.text(`GSTIN: ${invoice.gstin}`, 20, 60);
+    }
+    doc.text(`Date: ${invoice.date}`, 20, 70);
+    doc.text(`Status: ${invoice.status}`, 20, 80);
+
+    const subtotal = invoice.amount;
+    const gstRate = 0.18; // 18% GST
+    const gstAmount = subtotal * gstRate;
+    const total = subtotal + gstAmount;
 
     (doc as any).autoTable({
-        startY: 80,
+        startY: 90,
         head: [['Description', 'Amount']],
         body: [
-            ['Total Amount', new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(invoice.amount)],
+            ['Subtotal', new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(subtotal)],
+            [`GST (18%)`, new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(gstAmount)],
+            ['Total Amount', new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(total)],
         ],
     });
 

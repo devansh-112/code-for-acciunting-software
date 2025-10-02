@@ -5,6 +5,7 @@ export type Invoice = {
   status: 'paid' | 'pending' | 'overdue';
   date: string;
   email: string;
+  gstin?: string;
 };
 
 export type Expense = {

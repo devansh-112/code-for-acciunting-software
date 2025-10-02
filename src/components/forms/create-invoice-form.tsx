@@ -21,6 +21,7 @@ import { Invoice } from "@/lib/types"
 const formSchema = z.object({
   customer: z.string().min(1, "Customer name is required"),
   email: z.string().email("Invalid email address"),
+  gstin: z.string().optional(),
   amount: z.coerce.number().min(0.01, "Amount must be greater than 0"),
   status: z.enum(["paid", "pending", "overdue"]),
   date: z.string().min(1, "Date is required"),
@@ -37,6 +38,7 @@ export function CreateInvoiceForm({ setOpen, onSubmit }: CreateInvoiceFormProps)
     defaultValues: {
       customer: "",
       email: "",
+      gstin: "",
       amount: 0,
       status: "pending",
       date: new Date().toISOString().split('T')[0],
@@ -73,6 +75,19 @@ export function CreateInvoiceForm({ setOpen, onSubmit }: CreateInvoiceFormProps)
               <FormLabel>Customer Email</FormLabel>
               <FormControl>
                 <Input placeholder="Enter customer email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="gstin"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Customer GSTIN (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter GSTIN" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
