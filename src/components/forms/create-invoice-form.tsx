@@ -2,8 +2,9 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { z } from "zod"
+import { PlusCircle, Trash } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -18,13 +19,29 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Invoice } from "@/lib/types"
 
+const lineItemSchema = z.object({
+  description: z.string().min(1, "Description is required"),
+  hsn: z.string().min(1, "HSN/SAC is required"),
+  quantity: z.coerce.number().min(0.01, "Quantity must be > 0"),
+  unit: z.string().min(1, "Unit is required"),
+  price: z.coerce.number().min(0.01, "Price must be > 0"),
+});
+
 const formSchema = z.object({
-  customer: z.string().min(1, "Customer name is required"),
-  email: z.string().email("Invalid email address"),
-  gstin: z.string().optional(),
-  amount: z.coerce.number().min(0.01, "Amount must be greater than 0"),
+  billedTo: z.object({
+    name: z.string().min(1, "Customer name is required"),
+    address: z.string().min(1, "Customer address is required"),
+    gstin: z.string().min(1, "Customer GSTIN is required"),
+  }),
+  shippedTo: z.object({
+    name: z.string().min(1, "Recipient name is required"),
+    address: z.string().min(1, "Recipient address is required"),
+    gstin: z.string().min(1, "Recipient GSTIN is required"),
+  }),
+  placeOfSupply: z.string().min(1, "Place of supply is required"),
   status: z.enum(["paid", "pending", "overdue"]),
   date: z.string().min(1, "Date is required"),
+  items: z.array(lineItemSchema).min(1, "Invoice must have at least one item"),
 })
 
 type CreateInvoiceFormProps = {
@@ -36,111 +53,114 @@ export function CreateInvoiceForm({ setOpen, onSubmit }: CreateInvoiceFormProps)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      customer: "",
-      email: "",
-      gstin: "",
-      amount: 0,
+      billedTo: { name: "", address: "", gstin: "" },
+      shippedTo: { name: "", address: "", gstin: "" },
+      placeOfSupply: "",
       status: "pending",
       date: new Date().toISOString().split('T')[0],
+      items: [{ description: "", hsn: "", quantity: 1, unit: "Pcs", price: 0 }],
     },
   })
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "items"
+  });
+
   function handleFormSubmit(values: z.infer<typeof formSchema>) {
-    onSubmit(values);
+    onSubmit(values as Omit<Invoice, 'id'>);
     form.reset();
     setOpen(false);
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="customer"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Customer Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter customer name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Customer Email</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter customer email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="gstin"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Customer GSTIN (Optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter GSTIN" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Amount (INR)</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="0.00" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="overdue">Overdue</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-         <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Invoice Date</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <h3 className="font-medium">Billed To</h3>
+            <FormField control={form.control} name="billedTo.name" render={({ field }) => (
+              <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="Customer Name" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+             <FormField control={form.control} name="billedTo.address" render={({ field }) => (
+              <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Customer Address" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="billedTo.gstin" render={({ field }) => (
+              <FormItem><FormLabel>GSTIN/UIN</FormLabel><FormControl><Input placeholder="Customer GSTIN" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+          </div>
+          <div className="space-y-2">
+             <h3 className="font-medium">Shipped To</h3>
+             <FormField control={form.control} name="shippedTo.name" render={({ field }) => (
+              <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="Recipient Name" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+             <FormField control={form.control} name="shippedTo.address" render={({ field }) => (
+              <FormItem><FormLabel>Address</FormLabel><FormControl><Input placeholder="Recipient Address" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="shippedTo.gstin" render={({ field }) => (
+              <FormItem><FormLabel>GSTIN/UIN</FormLabel><FormControl><Input placeholder="Recipient GSTIN" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField control={form.control} name="placeOfSupply" render={({ field }) => (
+                <FormItem><FormLabel>Place of Supply</FormLabel><FormControl><Input placeholder="e.g., Rajasthan" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+             <FormField control={form.control} name="date" render={({ field }) => (
+                <FormItem><FormLabel>Invoice Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="status" render={({ field }) => (
+                <FormItem><FormLabel>Status</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                    <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="overdue">Overdue</SelectItem>
+                    </SelectContent>
+                </Select>
+                <FormMessage />
+                </FormItem>
+            )} />
+        </div>
+        
+        <div>
+          <h3 className="font-medium mb-2">Invoice Items</h3>
+          <div className="space-y-4">
+            {fields.map((field, index) => (
+              <div key={field.id} className="grid grid-cols-12 gap-2 items-start">
+                <FormField control={form.control} name={`items.${index}.description`} render={({ field }) => (
+                  <FormItem className="col-span-3"><FormLabel className="sr-only">Description</FormLabel><FormControl><Input placeholder="Description" {...field} /></FormControl></FormItem>
+                )} />
+                <FormField control={form.control} name={`items.${index}.hsn`} render={({ field }) => (
+                  <FormItem className="col-span-2"><FormLabel className="sr-only">HSN</FormLabel><FormControl><Input placeholder="HSN/SAC" {...field} /></FormControl></FormItem>
+                )} />
+                <FormField control={form.control} name={`items.${index}.quantity`} render={({ field }) => (
+                  <FormItem className="col-span-1"><FormLabel className="sr-only">Qty</FormLabel><FormControl><Input type="number" placeholder="Qty" {...field} /></FormControl></FormItem>
+                )} />
+                 <FormField control={form.control} name={`items.${index}.unit`} render={({ field }) => (
+                  <FormItem className="col-span-2"><FormLabel className="sr-only">Unit</FormLabel><FormControl><Input placeholder="Unit" {...field} /></FormControl></FormItem>
+                )} />
+                <FormField control={form.control} name={`items.${index}.price`} render={({ field }) => (
+                  <FormItem className="col-span-2"><FormLabel className="sr-only">Price</FormLabel><FormControl><Input type="number" placeholder="Price" {...field} /></FormControl></FormItem>
+                )} />
+                <div className="col-span-2 flex items-center gap-2">
+                    <div className="font-medium text-sm self-center pt-2">
+                        {`₹${(form.watch(`items.${index}.quantity`) * form.watch(`items.${index}.price`)).toFixed(2)}`}
+                    </div>
+                    <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}><Trash className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            ))}
+          </div>
+           <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => append({ description: "", hsn: "", quantity: 1, unit: "Pcs", price: 0 })}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
+            </Button>
+        </div>
+
+
         <Button type="submit">Create Invoice</Button>
       </form>
     </Form>

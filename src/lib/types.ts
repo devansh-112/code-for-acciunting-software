@@ -1,11 +1,25 @@
+export type InvoiceItem = {
+  description: string;
+  hsn: string;
+  quantity: number;
+  unit: string;
+  price: number;
+};
+
+export type InvoiceParty = {
+  name: string;
+  address: string;
+  gstin: string;
+}
+
 export type Invoice = {
   id: string;
-  customer: string;
-  amount: number;
-  status: 'paid' | 'pending' | 'overdue';
+  billedTo: InvoiceParty;
+  shippedTo: InvoiceParty;
   date: string;
-  email: string;
-  gstin?: string;
+  placeOfSupply: string;
+  status: 'paid' | 'pending' | 'overdue';
+  items: InvoiceItem[];
 };
 
 export type Expense = {
@@ -29,4 +43,19 @@ export type InventoryItem = {
   name: string;
   quantity: number;
   price: number;
+};
+
+export type CompanyDetails = {
+  name: string;
+  gstin: string;
+  address: string;
+  email: string;
+  phone: string;
+  bankDetails: {
+    name: string;
+    branch: string;
+    accountNumber: string;
+    ifsc: string;
+  };
+  terms: string[];
 };

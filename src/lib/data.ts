@@ -1,4 +1,4 @@
-import { Invoice, Expense, Account, InventoryItem } from './types';
+import { Invoice, Expense, Account, InventoryItem, CompanyDetails } from './types';
 
 export const kpiData = [
   {
@@ -49,6 +49,30 @@ export const expenses: Expense[] = [];
 export const accounts: Account[] = [];
 
 export const inventoryItems: InventoryItem[] = [];
+
+export let companyDetails: CompanyDetails = {
+  name: 'JAGDAMBA ELECTRONICS INDIA',
+  gstin: '07AZSPG4196Q1ZC',
+  address: 'SALES OFFICE:- 56B/12A, RAMA ROAD INDUSTRIAL AREA, DELHI - 110015',
+  email: 'info.jagma@gmail.com',
+  phone: '9999033749, 9811288585',
+  bankDetails: {
+    name: 'AXIS BANK',
+    branch: 'SHAKTI NAGAR',
+    accountNumber: '919020042795558',
+    ifsc: 'UTIB0000054'
+  },
+  terms: [
+    'Goods once sold will not be taken back.',
+    'Interest @ 18% p.a. will be charged if the payment is not made with in the stipulated time.',
+    'Subject to \'Delhi\' Jurisdiction only.'
+  ]
+};
+
+export function setCompanyDetails(newDetails: CompanyDetails) {
+  companyDetails = newDetails;
+}
+
 
 export const reportText = `
 Financial Report for Q1 2024

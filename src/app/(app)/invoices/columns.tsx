@@ -41,12 +41,10 @@ export const columns: ColumnDef<Invoice>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Customer" />
     ),
-  },
-   {
-    accessorKey: 'email',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Email" />
-    ),
+    cell: ({ row }) => {
+      const invoice = row.original as Invoice;
+      return <div>{invoice.billedTo.name}</div>
+    }
   },
   {
     accessorKey: 'status',
@@ -87,11 +85,12 @@ export const columns: ColumnDef<Invoice>[] = [
       <DataTableColumnHeader column={column} title="Amount" />
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue('amount'));
+      const invoice = row.original as Invoice;
+      const total = invoice.items.reduce((acc, item) => acc + item.quantity * item.price, 0)
       const formatted = new Intl.NumberFormat('en-IN', {
         style: 'currency',
         currency: 'INR',
-      }).format(amount);
+      }).format(total);
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
