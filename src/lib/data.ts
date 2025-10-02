@@ -1,4 +1,4 @@
-import { Invoice, Expense } from './types';
+import { Invoice, Expense, Account, InventoryItem } from './types';
 
 export const kpiData = [
   {
@@ -62,6 +62,23 @@ export const expenses: Expense[] = [
     { id: 'EXP-007', vendor: 'The Grand Cafe', amount: 125.20, status: 'paid', date: '2023-11-04', category: 'Meals & Entertainment' },
 ];
 
+export const accounts: Account[] = [
+  { id: 'ACC-001', name: 'Cash', type: 'asset', balance: 50000.00 },
+  { id: 'ACC-002', name: 'Accounts Receivable', type: 'asset', balance: 12500.00 },
+  { id: 'ACC-003', name: 'Inventory', type: 'asset', balance: 35000.00 },
+  { id: 'ACC-004', name: 'Accounts Payable', type: 'liability', balance: 8000.00 },
+  { id: 'ACC-005', name: 'Sales Revenue', type: 'revenue', balance: 150000.00 },
+  { id: 'ACC-006', name: 'Cost of Goods Sold', type: 'expense', balance: 75000.00 },
+  { id: 'ACC-007', name: 'Owner\'s Equity', type: 'equity', balance: 64500.00 },
+];
+
+export const inventoryItems: InventoryItem[] = [
+    { sku: 'WID-001', name: 'Standard Widget', quantity: 150, price: 25.00 },
+    { sku: 'WID-002', name: 'Premium Widget', quantity: 75, price: 50.00 },
+    { sku: 'GAD-001', name: 'Gizmo', quantity: 200, price: 15.00 },
+    { sku: 'GAD-002', name: 'Super Gizmo', quantity: 100, price: 45.00 },
+    { sku: 'DOO-001', name: 'Doodad', quantity: 500, price: 5.00 },
+];
 
 export const reportText = `
 Financial Report for Q4 2023

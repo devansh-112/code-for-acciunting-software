@@ -15,3 +15,17 @@ export type Expense = {
   date: string;
   status: 'paid' | 'pending' | 'unpaid';
 };
+
+export type Account = {
+  id: string;
+  name: string;
+  type: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+  balance: number;
+};
+
+export type InventoryItem = {
+  sku: string;
+  name: string;
+  quantity: number;
+  price: number;
+};

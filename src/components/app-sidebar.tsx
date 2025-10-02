@@ -14,6 +14,8 @@ import {
   Receipt,
   BarChart3,
   Settings,
+  Landmark,
+  Package,
 } from 'lucide-react';
 import { Logo } from './logo';
 import { usePathname } from 'next/navigation';
@@ -23,6 +25,8 @@ const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/invoices', icon: FileText, label: 'Invoices' },
   { href: '/expenses', icon: Receipt, label: 'Expenses' },
+  { href: '/accounts', icon: Landmark, label: 'Accounts' },
+  { href: '/inventory', icon: Package, label: 'Inventory' },
   { href: '/reports', icon: BarChart3, label: 'Reports' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ];
