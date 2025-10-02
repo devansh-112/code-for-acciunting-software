@@ -37,13 +37,16 @@ export const columns: ColumnDef<Invoice>[] = [
     ),
   },
   {
-    accessorKey: 'customer',
+    accessorKey: 'billedTo',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Customer" />
     ),
     cell: ({ row }) => {
       const invoice = row.original as Invoice;
       return <div>{invoice.billedTo.name}</div>
+    },
+    filterFn: (row, id, value) => {
+      return (row.original.billedTo.name as string).toLowerCase().includes(value.toLowerCase());
     }
   },
   {

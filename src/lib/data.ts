@@ -4,25 +4,25 @@ export const kpiData = [
   {
     title: 'Total Revenue',
     value: '₹0',
-    change: '+0% from last month',
+    change: '',
     icon: 'DollarSign',
   },
   {
     title: 'Total Expenses',
     value: '₹0',
-    change: '+0% from last month',
+    change: '',
     icon: 'CreditCard',
   },
   {
     title: 'Net Income',
     value: '₹0',
-    change: '+0% from last month',
+    change: '',
     icon: 'BarChart3',
   },
   {
     title: 'Invoices Pending',
     value: '0',
-    change: '0 from last month',
+    change: '',
     icon: 'FileText',
   },
 ];
@@ -41,14 +41,6 @@ export const chartData = [
   { name: 'Nov', income: 0, expense: 0 },
   { name: 'Dec', income: 0, expense: 0 },
 ];
-
-export const invoices: Invoice[] = [];
-
-export const expenses: Expense[] = [];
-
-export const accounts: Account[] = [];
-
-export const inventoryItems: InventoryItem[] = [];
 
 export let companyDetails: CompanyDetails = {
   name: 'JAGDAMBA ELECTRONICS INDIA',

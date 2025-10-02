@@ -28,7 +28,7 @@ const formSchema = z.object({
 
 type CreateInventoryItemFormProps = {
   setOpen: (open: boolean) => void;
-  onSubmit: (values: InventoryItem) => void;
+  onSubmit: (values: Omit<InventoryItem, 'id' | 'userId'>) => void;
 }
 
 export function CreateInventoryItemForm({ setOpen, onSubmit }: CreateInventoryItemFormProps) {
@@ -45,7 +45,7 @@ export function CreateInventoryItemForm({ setOpen, onSubmit }: CreateInventoryIt
   })
 
   function handleFormSubmit(values: z.infer<typeof formSchema>) {
-    onSubmit(values as InventoryItem);
+    onSubmit(values);
     form.reset();
     setOpen(false);
   }

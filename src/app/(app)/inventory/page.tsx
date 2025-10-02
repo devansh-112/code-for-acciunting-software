@@ -1,24 +1,28 @@
-
 'use client';
 
-import { useState } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
-import { inventoryItems as initialInventory } from '@/lib/data';
 import { columns } from './columns';
 import { CreateInventoryItemForm } from '@/components/forms/create-inventory-item-form';
 import { InventoryItem } from '@/lib/types';
+import { useCollection, useFirebase, useMemoFirebase, useUser } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
+import { addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function InventoryPage() {
-  const [inventoryItems, setInventoryItems] = useState(initialInventory);
+  const { firestore } = useFirebase();
+  const { user } = useUser();
 
-  const addInventoryItem = (item: InventoryItem) => {
-    setInventoryItems(prev => [...prev, item]);
+  const inventoryRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, `users/${user.uid}/inventory`);
+  }, [firestore, user]);
+
+  const { data: inventoryItems, isLoading } = useCollection<InventoryItem>(inventoryRef);
+
+  const addInventoryItem = (item: Omit<InventoryItem, 'id' | 'userId'>) => {
+    if (!inventoryRef) return;
+    addDocumentNonBlocking(inventoryRef, { ...item, userId: user!.uid });
   };
-
-  const updateInventoryItem = (sku: string, quantity: number) => {
-    setInventoryItems(prev => prev.map(item => item.sku === sku ? { ...item, quantity: item.quantity + quantity } : item));
-  };
-
 
   return (
     <div className="flex flex-col gap-8">
@@ -32,7 +36,7 @@ export default function InventoryPage() {
       </div>
       <DataTable 
         columns={columns} 
-        data={inventoryItems} 
+        data={isLoading ? [] : inventoryItems || []} 
         searchKey="name" 
         createFormComponent={(props) => <CreateInventoryItemForm {...props} onSubmit={addInventoryItem} />}
       />

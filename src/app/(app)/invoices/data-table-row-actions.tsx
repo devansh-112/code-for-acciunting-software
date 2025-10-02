@@ -16,6 +16,9 @@ import 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import { Invoice } from '@/lib/types';
 import { companyDetails } from '@/lib/data';
+import { useFirebase, useUser } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 
 interface DataTableRowActionsProps<TData> {
@@ -26,6 +29,8 @@ export function DataTableRowActions<TData>({
   row,
 }: DataTableRowActionsProps<TData>) {
   const invoice = row.original as Invoice;
+  const { firestore } = useFirebase();
+  const { user } = useUser();
 
   const downloadInvoice = () => {
     const doc = new jsPDF();
@@ -59,18 +64,18 @@ export function DataTableRowActions<TData>({
     doc.setFont(undefined, 'normal');
     doc.text(invoice.billedTo.name, 14, 70);
     doc.text(invoice.billedTo.address, 14, 75);
-    doc.text(`GSTIN/UIN: ${invoice.billedTo.gstin}`, 14, 80);
+    if(invoice.billedTo.gstin) doc.text(`GSTIN/UIN: ${invoice.billedTo.gstin}`, 14, 80);
 
     doc.setFont(undefined, 'bold');
     doc.text('Shipped to:', pageWidth / 2 + 10, 65);
     doc.setFont(undefined, 'normal');
     doc.text(invoice.shippedTo.name, pageWidth / 2 + 10, 70);
     doc.text(invoice.shippedTo.address, pageWidth / 2 + 10, 75);
-    doc.text(`GSTIN/UIN: ${invoice.shippedTo.gstin}`, pageWidth / 2 + 10, 80);
+    if(invoice.shippedTo.gstin) doc.text(`GSTIN/UIN: ${invoice.shippedTo.gstin}`, pageWidth / 2 + 10, 80);
 
     // Items Table
     const subtotal = invoice.items.reduce((acc, item) => acc + item.quantity * item.price, 0);
-    const gstRate = 0.18; // 18% GST
+    const gstRate = invoice.items.length > 0 ? invoice.items[0].gstRate / 100 : 0.18;
     const gstAmount = subtotal * gstRate;
     const total = subtotal + gstAmount;
 
@@ -97,8 +102,8 @@ export function DataTableRowActions<TData>({
     doc.setFontSize(10);
     doc.text('Subtotal', pageWidth - 50, finalY + 10);
     doc.text(subtotal.toFixed(2), pageWidth - 14, finalY + 10, { align: 'right' });
-    doc.text(`IGST @ 18%`, pageWidth - 50, finalY + 15);
-    doc.text(gstAmount.toFixed(2), pageWidth - 14, finalY + 15, { align: 'right' });
+    doc.text(`IGST @ ${gstRate * 100}%`, pageWidth - 50, finalY + 15);
+    doctext(gstAmount.toFixed(2), pageWidth - 14, finalY + 15, { align: 'right' });
     doc.setFont(undefined, 'bold');
     doc.text('Grand Total', pageWidth - 50, finalY + 20);
     doc.text(total.toFixed(2), pageWidth - 14, finalY + 20, { align: 'right' });
@@ -131,6 +136,12 @@ export function DataTableRowActions<TData>({
     saveAs(pdfBlob, `invoice-${invoice.id}.pdf`);
   };
 
+  const deleteInvoice = () => {
+    if (!user) return;
+    const invoiceRef = doc(firestore, `users/${user.uid}/invoices`, invoice.id);
+    deleteDocumentNonBlocking(invoiceRef);
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -152,7 +163,7 @@ export function DataTableRowActions<TData>({
           Download
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={deleteInvoice}>
           <Trash className="mr-2 h-4 w-4" />
           Delete
         </DropdownMenuItem>

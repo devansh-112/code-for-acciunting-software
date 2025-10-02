@@ -26,7 +26,7 @@ const formSchema = z.object({
 
 type CreateAccountFormProps = {
   setOpen: (open: boolean) => void;
-  onSubmit: (values: Omit<Account, 'id'>) => void;
+  onSubmit: (values: Omit<Account, 'id' | 'userId'>) => void;
 };
 
 export function CreateAccountForm({ setOpen, onSubmit }: CreateAccountFormProps) {

@@ -23,6 +23,7 @@ export type Invoice = {
   placeOfSupply: string;
   status: 'paid' | 'pending' | 'overdue';
   items: InvoiceItem[];
+  userId: string;
 };
 
 export type Expense = {
@@ -32,6 +33,7 @@ export type Expense = {
   amount: number;
   date: string;
   status: 'paid' | 'pending' | 'unpaid';
+  userId: string;
 };
 
 export type Account = {
@@ -39,15 +41,18 @@ export type Account = {
   name: string;
   type: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
   balance: number;
+  userId: string;
 };
 
 export type InventoryItem = {
+  id: string; // Changed from sku to id for Firestore compatibility
   sku: string;
   name: string;
   hsn?: string;
   gstRate?: number;
   quantity: number;
   price: number;
+  userId: string;
 };
 
 export type CompanyDetails = {

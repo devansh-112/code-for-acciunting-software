@@ -61,13 +61,22 @@ export function DataTable<TData, TValue>({
   // This is a bit of a hack to pass inventoryItems to the form
   // A better solution would be to use a state management library
   const formProps: any = {};
-  if (CreateFormComponent && CreateFormComponent.name === 'CreateInvoiceForm') {
-    formProps.inventoryItems = data;
+  if (CreateFormComponent) {
+    // A bit of a hack to check which form we are rendering to pass the correct props
+    const isInvoiceForm = CreateFormComponent.name === 'CreateInvoiceForm';
+    if(isInvoiceForm){
+       formProps.inventoryItems = (table.options.data as any[]).find(d => d.key === 'inventoryItems')?.data;
+    }
   }
 
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} searchKey={searchKey} createFormComponent={CreateFormComponent} formProps={formProps} />
+      <DataTableToolbar 
+          table={table} 
+          searchKey={searchKey} 
+          createFormComponent={CreateFormComponent} 
+          formProps={{ inventoryItems: data }} // Pass data directly
+      />
       <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>

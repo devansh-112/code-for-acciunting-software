@@ -38,12 +38,12 @@ const formSchema = z.object({
   billedTo: z.object({
     name: z.string().min(1, "Customer name is required"),
     address: z.string().min(1, "Customer address is required"),
-    gstin: z.string().min(1, "Customer GSTIN is required"),
+    gstin: z.string().optional(),
   }),
   shippedTo: z.object({
     name: z.string().min(1, "Recipient name is required"),
     address: z.string().min(1, "Recipient address is required"),
-    gstin: z.string().min(1, "Recipient GSTIN is required"),
+    gstin: z.string().optional(),
   }),
   placeOfSupply: z.string().min(1, "Place of supply is required"),
   status: z.enum(["paid", "pending", "overdue"]),
@@ -53,7 +53,7 @@ const formSchema = z.object({
 
 type CreateInvoiceFormProps = {
   setOpen: (open: boolean) => void;
-  onSubmit: (values: Omit<Invoice, 'id'>) => void;
+  onSubmit: (values: Omit<Invoice, 'id' | 'userId'>) => void;
   inventoryItems: InventoryItem[];
 };
 
@@ -86,7 +86,7 @@ export function CreateInvoiceForm({ setOpen, onSubmit, inventoryItems }: CreateI
   }, [billedToValues, sameAsBilledTo, form]);
 
   function handleFormSubmit(values: z.infer<typeof formSchema>) {
-    onSubmit(values as Omit<Invoice, 'id'>);
+    onSubmit(values as Omit<Invoice, 'id' | 'userId'>);
     form.reset();
     setOpen(false);
   }

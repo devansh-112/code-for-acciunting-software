@@ -24,7 +24,7 @@ export function DataTableToolbar<TData>({
   formProps
 }: DataTableToolbarProps<TData>) {
   const [open, setOpen] = React.useState(false);
-  const dataForForm = searchKey === 'customer' ? formProps.inventoryItems : table.options.data;
+  const dataForForm = searchKey === 'billedTo' ? formProps.inventoryItems : table.options.data;
 
   return (
     <div className="flex items-center justify-between">
