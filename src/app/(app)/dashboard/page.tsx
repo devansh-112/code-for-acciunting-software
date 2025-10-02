@@ -3,7 +3,7 @@
 
 import { StatCard } from '@/components/stat-card';
 import { OverviewChart } from '@/components/overview-chart';
-import { kpiData, invoices as initialInvoices, expenses as initialExpenses } from '@/lib/data';
+import { kpiData } from '@/lib/data';
 import * as Icons from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -22,11 +22,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useState } from 'react';
+import { useInvoiceContext } from '@/lib/context/invoice-context';
 
 export default function DashboardPage() {
-  const [invoices, setInvoices] = useState(initialInvoices);
-
+  const { invoices } = useInvoiceContext();
   const recentInvoices = invoices.slice(0, 5);
 
   return (

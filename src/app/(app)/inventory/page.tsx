@@ -1,23 +1,13 @@
 
 'use client';
 
-import { useState } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
 import { columns } from './columns';
-import { inventory as initialInventory } from '@/lib/data';
 import { CreateInventoryItemForm } from '@/components/forms/create-inventory-item-form';
-import { InventoryItem } from '@/lib/types';
+import { useInventoryContext } from '@/lib/context/inventory-context';
 
 export default function InventoryPage() {
-  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>(initialInventory);
-
-  const addInventoryItem = (item: Omit<InventoryItem, 'id'>) => {
-    const newItem = {
-      ...item,
-      id: item.sku, // Use SKU as ID for simplicity in this non-DB version
-    };
-    setInventoryItems([...inventoryItems, newItem]);
-  };
+  const { inventoryItems, addInventoryItem } = useInventoryContext();
 
   return (
     <div className="flex flex-col gap-8">

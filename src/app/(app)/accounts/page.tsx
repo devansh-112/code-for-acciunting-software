@@ -1,23 +1,13 @@
 
 'use client';
 
-import { useState } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
 import { columns } from './columns';
-import { accounts as initialAccounts } from '@/lib/data';
 import { CreateAccountForm } from '@/components/forms/create-account-form';
-import { Account } from '@/lib/types';
+import { useAccountContext } from '@/lib/context/account-context';
 
 export default function AccountsPage() {
-  const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
-
-  const addAccount = (account: Omit<Account, 'id'>) => {
-    const newAccount = {
-      ...account,
-      id: `ACC-${(Math.random() * 1000).toFixed(0).padStart(3, '0')}`,
-    };
-    setAccounts([...accounts, newAccount]);
-  };
+  const { accounts, addAccount } = useAccountContext();
 
   return (
     <div className="flex flex-col gap-8">

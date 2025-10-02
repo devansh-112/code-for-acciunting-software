@@ -66,3 +66,27 @@ export type CompanyDetails = {
   };
   terms: string[];
 };
+
+// Context Types
+
+export type AccountContextType = {
+  accounts: Account[];
+  addAccount: (account: Omit<Account, 'id'>) => void;
+};
+
+export type ExpenseContextType = {
+  expenses: Expense[];
+  addExpense: (expense: Omit<Expense, 'id'>) => void;
+};
+
+export type InventoryContextType = {
+  inventoryItems: InventoryItem[];
+  addInventoryItem: (item: Omit<InventoryItem, 'id'>) => void;
+  updateInventoryQuantity: (sku: string, quantityChange: number) => void;
+};
+
+export type InvoiceContextType = {
+  invoices: Invoice[];
+  addInvoice: (invoice: Omit<Invoice, 'id'>) => void;
+  deleteInvoice: (id: string) => void;
+};
