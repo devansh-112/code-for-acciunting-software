@@ -1,0 +1,130 @@
+/**
+ * @fileoverview Firestore Security Rules for the accounting application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model. Each user can only
+ * access data directly associated with their user ID. This ensures data
+ * privacy and prevents unauthorized access.
+ *
+ * Data Structure:
+ * All data is nested under /users/{userId}, including invoices, expenses, and
+ * reports. This hierarchical structure simplifies security rules by leveraging
+ * path-based ownership.
+ *
+ * Key Security Decisions:
+ * - User listing is explicitly denied to protect user privacy.
+ * - All write operations are restricted to the authenticated user,
+ *   verified by matching the userId in the path.
+ *
+ * Denormalization for Authorization:
+ * The data structure inherently denormalizes the user ID into the path,
+ * allowing for simple and efficient authorization checks without requiring
+ * additional reads.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Enforces user-ownership for accessing user profiles.
+     * @path /users/{userId}
+     * @allow (create) - Authenticated user with matching user ID can create their profile.
+     * @allow (get, update, delete) - Authenticated user with matching user ID can access and modify their profile.
+     * @deny (create) - Authenticated user trying to create a profile with a different user ID.
+     * @deny (get, update, delete) - Authenticated user trying to access or modify another user's profile.
+     * @deny (list) - Prevents listing all users.
+     * @principle Enforces document ownership and prevents unauthorized data access.
+     */
+    match /users/{userId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId);
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    /**
+     * @description Enforces user-ownership for accessing invoices.
+     * @path /users/{userId}/invoices/{invoiceId}
+     * @allow (create) - Authenticated user with matching user ID can create invoices under their profile.
+     * @allow (get, update, delete) - Authenticated user with matching user ID can access and modify their invoices.
+     * @deny (create) - Authenticated user trying to create an invoice with a different user ID.
+     * @deny (get, update, delete) - Authenticated user trying to access or modify another user's invoices.
+     * @principle Enforces document ownership and prevents unauthorized data access.
+     */
+    match /users/{userId}/invoices/{invoiceId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+       function isExistingOwner(userId) {
+        return isSignedIn() && isOwner(userId) && resource != null;
+      }
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Enforces user-ownership for accessing expenses.
+     * @path /users/{userId}/expenses/{expenseId}
+     * @allow (create) - Authenticated user with matching user ID can create expenses under their profile.
+     * @allow (get, update, delete) - Authenticated user with matching user ID can access and modify their expenses.
+     * @deny (create) - Authenticated user trying to create an expense with a different user ID.
+     * @deny (get, update, delete) - Authenticated user trying to access or modify another user's expenses.
+     * @principle Enforces document ownership and prevents unauthorized data access.
+     */
+    match /users/{userId}/expenses/{expenseId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+        function isExistingOwner(userId) {
+        return isSignedIn() && isOwner(userId) && resource != null;
+      }
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Enforces user-ownership for accessing reports.
+     * @path /users/{userId}/reports/{reportId}
+     * @allow (create) - Authenticated user with matching user ID can create reports under their profile.
+     * @allow (get, update, delete) - Authenticated user with matching user ID can access and modify their reports.
+     * @deny (create) - Authenticated user trying to create a report with a different user ID.
+     * @deny (get, update, delete) - Authenticated user trying to access or modify another user's reports.
+     * @principle Enforces document ownership and prevents unauthorized data access.
+     */
+    match /users/{userId}/reports/{reportId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+        function isExistingOwner(userId) {
+        return isSignedIn() && isOwner(userId) && resource != null;
+      }
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+  }
+}
