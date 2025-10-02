@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -13,6 +14,11 @@ export default function InventoryPage() {
   const addInventoryItem = (item: InventoryItem) => {
     setInventoryItems(prev => [...prev, item]);
   };
+
+  const updateInventoryItem = (sku: string, quantity: number) => {
+    setInventoryItems(prev => prev.map(item => item.sku === sku ? { ...item, quantity: item.quantity + quantity } : item));
+  };
+
 
   return (
     <div className="flex flex-col gap-8">

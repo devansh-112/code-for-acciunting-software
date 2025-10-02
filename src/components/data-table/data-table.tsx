@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -23,12 +24,14 @@ import {
 } from '@/components/ui/table';
 import { DataTablePagination } from './data-table-pagination';
 import { DataTableToolbar } from './data-table-toolbar';
+import { InventoryItem } from '@/lib/types';
+
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey: string;
-  createFormComponent?: React.ComponentType<{ setOpen: (open: boolean) => void }>;
+  createFormComponent?: React.ComponentType<{ setOpen: (open: boolean) => void, inventoryItems?: InventoryItem[] }>;
 }
 
 export function DataTable<TData, TValue>({
@@ -55,9 +58,16 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  // This is a bit of a hack to pass inventoryItems to the form
+  // A better solution would be to use a state management library
+  const formProps: any = {};
+  if (CreateFormComponent && createFormComponent?.name === 'CreateInvoiceForm') {
+    formProps.inventoryItems = data;
+  }
+
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} searchKey={searchKey} createFormComponent={CreateFormComponent} />
+      <DataTableToolbar table={table} searchKey={searchKey} createFormComponent={CreateFormComponent} formProps={formProps} />
       <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>

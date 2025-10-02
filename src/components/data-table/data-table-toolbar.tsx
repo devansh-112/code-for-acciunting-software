@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Table } from '@tanstack/react-table';
@@ -6,19 +7,24 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import React from 'react';
+import { InventoryItem } from '@/lib/types';
+
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   searchKey: string;
-  createFormComponent?: React.ComponentType<{ setOpen: (open: boolean) => void }>;
+  createFormComponent?: React.ComponentType<{ setOpen: (open: boolean) => void, inventoryItems?: InventoryItem[] }>;
+  formProps?: any;
 }
 
 export function DataTableToolbar<TData>({
   table,
   searchKey,
   createFormComponent: CreateFormComponent,
+  formProps
 }: DataTableToolbarProps<TData>) {
   const [open, setOpen] = React.useState(false);
+  const dataForForm = searchKey === 'customer' ? formProps.inventoryItems : table.options.data;
 
   return (
     <div className="flex items-center justify-between">
@@ -40,11 +46,11 @@ export function DataTableToolbar<TData>({
               Add New
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-4xl">
             <DialogHeader>
               <DialogTitle>Add New</DialogTitle>
             </DialogHeader>
-            <CreateFormComponent setOpen={setOpen} />
+            <CreateFormComponent setOpen={setOpen} inventoryItems={dataForForm} {...formProps} />
           </DialogContent>
         </Dialog>
       )}

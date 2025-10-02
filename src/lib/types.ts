@@ -1,9 +1,12 @@
+
 export type InvoiceItem = {
+  sku: string;
   description: string;
   hsn: string;
   quantity: number;
   unit: string;
   price: number;
+  gstRate: number;
 };
 
 export type InvoiceParty = {
@@ -41,6 +44,8 @@ export type Account = {
 export type InventoryItem = {
   sku: string;
   name: string;
+  hsn?: string;
+  gstRate?: number;
   quantity: number;
   price: number;
 };

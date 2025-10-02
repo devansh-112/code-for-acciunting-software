@@ -1,16 +1,29 @@
+
 'use client';
 
 import { useState } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
-import { invoices as initialInvoices } from '@/lib/data';
+import { invoices as initialInvoices, inventoryItems as initialInventory } from '@/lib/data';
 import { columns } from './columns';
 import { CreateInvoiceForm } from '@/components/forms/create-invoice-form';
-import { Invoice } from '@/lib/types';
+import { Invoice, InventoryItem } from '@/lib/types';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState(initialInvoices);
+  const [inventoryItems, setInventoryItems] = useState(initialInventory);
 
   const addInvoice = (invoice: Omit<Invoice, 'id'>) => {
+    // Update inventory
+    const newInventory = [...inventoryItems];
+    invoice.items.forEach(item => {
+      const inventoryItemIndex = newInventory.findIndex(invItem => invItem.sku === item.sku);
+      if (inventoryItemIndex !== -1) {
+        newInventory[inventoryItemIndex].quantity -= item.quantity;
+      }
+    });
+    setInventoryItems(newInventory);
+
+    // Add invoice
     setInvoices(prev => [...prev, { ...invoice, id: `INV-${Date.now()}` }]);
   };
 
@@ -28,7 +41,7 @@ export default function InvoicesPage() {
         columns={columns} 
         data={invoices} 
         searchKey="customer" 
-        createFormComponent={(props) => <CreateInvoiceForm {...props} onSubmit={addInvoice} />}
+        createFormComponent={(props) => <CreateInvoiceForm {...props} onSubmit={addInvoice} inventoryItems={inventoryItems} />}
       />
     </div>
   );

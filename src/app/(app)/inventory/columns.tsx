@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
@@ -38,6 +39,12 @@ export const columns: ColumnDef<InventoryItem>[] = [
     accessorKey: 'name',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Item Name" />
+    ),
+  },
+    {
+    accessorKey: 'hsn',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="HSN/SAC" />
     ),
   },
   {
