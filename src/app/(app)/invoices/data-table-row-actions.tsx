@@ -103,7 +103,7 @@ export function DataTableRowActions<TData>({
     doc.text('Subtotal', pageWidth - 50, finalY + 10);
     doc.text(subtotal.toFixed(2), pageWidth - 14, finalY + 10, { align: 'right' });
     doc.text(`IGST @ ${gstRate * 100}%`, pageWidth - 50, finalY + 15);
-    doctext(gstAmount.toFixed(2), pageWidth - 14, finalY + 15, { align: 'right' });
+    doc.text(gstAmount.toFixed(2), pageWidth - 14, finalY + 15, { align: 'right' });
     doc.setFont(undefined, 'bold');
     doc.text('Grand Total', pageWidth - 50, finalY + 20);
     doc.text(total.toFixed(2), pageWidth - 14, finalY + 20, { align: 'right' });
