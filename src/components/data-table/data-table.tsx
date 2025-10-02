@@ -61,7 +61,7 @@ export function DataTable<TData, TValue>({
   // This is a bit of a hack to pass inventoryItems to the form
   // A better solution would be to use a state management library
   const formProps: any = {};
-  if (CreateFormComponent && createFormComponent?.name === 'CreateInvoiceForm') {
+  if (CreateFormComponent && CreateFormComponent.name === 'CreateInvoiceForm') {
     formProps.inventoryItems = data;
   }
 
