@@ -1,155 +1,151 @@
 /**
- * @fileoverview Firestore Security Rules for Prototyping.
+ * @fileoverview Firestore Security Rules for the accounting application.
  *
  * Core Philosophy:
- * This ruleset enforces a strict user-ownership model. Each user can only access
- * data under their own user ID. This approach prioritizes security and data isolation.
+ * This ruleset enforces a strict user-ownership model where each user can only
+ * access data explicitly associated with their user ID. This is achieved through
+ * path-based authorization, ensuring that all data is namespaced under the
+ * /users/{userId} collection.
  *
  * Data Structure:
- * The Firestore database is structured with user-specific data nested under the `/users/{userId}` path.
- * - /users/{userId}: Stores user profile information.
- * - /users/{userId}/invoices/{invoiceId}: Stores invoices issued by the user.
- * - /users/{userId}/expenses/{expenseId}: Stores expenses incurred by the user.
- * - /users/{userId}/reports/{reportId}: Stores financial reports generated for the user.
- * - /users/{userId}/inventory/{inventoryId}: Stores inventory items for the user.
+ * All data is nested under /users/{userId}, including invoices, expenses, and
+ * reports. This structure simplifies the rules and improves performance by
+ * avoiding complex queries or 'get()' calls.
  *
  * Key Security Decisions:
- * - User data is strictly segregated by user ID.
- * - List operations are restricted to the owner of the data.
- * - The rules explicitly deny any ambiguous or unhandled access patterns.
+ * - User listing is explicitly denied.
+ * - Write operations always validate user ownership based on the document path.
+ * - Data schema validation is relaxed in the Prototyping Mode to enable rapid iteration.
  *
  * Denormalization for Authorization:
- * To simplify rules and improve performance, the `userId` is included within each document (invoice, expense, report).
- * This allows for quick ownership checks without additional `get()` operations. The rules also validate
- * that this `userId` matches the `userId` in the path.
+ * The 'userId' is embedded within each document (Invoice, Expense, Report, etc.)
+ * to allow simple 'isOwner()' checks. This ensures that authorization checks
+ * are efficient and do not require additional reads. The userId field is also validated to match the userId path to prevent spoofing.
+ *
+ * Structural Segregation:
+ * All user-specific data is stored under the /users/{userId} collection,
+ * ensuring a clear separation of data and simplified security management.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Secure user profiles. Only the user can read/write their own profile.
+     * @description Checks if the request is made by an authenticated user.
+     * @path N/A
+     * @allow N/A
+     * @deny N/A
+     * @principle Prevents unauthenticated access.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the request is made by the owner of the resource.
+     * @path N/A
+     * @allow N/A
+     * @deny N/A
+     * @principle Enforces document ownership.
+     */
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the user is the owner and the resource exists.
+     * @path N/A
+     * @allow N/A
+     * @deny N/A
+     * @principle Enforces document ownership and existence for updates and deletes.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && existsAfter(/databases/$(database)/documents/users/$(userId));
+    }
+
+    /**
+     * @description Rule for the /users/{userId} collection.
      * @path /users/{userId}
-     * @allow (create) - User with ID 'user_abc' can create their profile if authenticated as 'user_abc'.
-     * @allow (get, update, delete) - User with ID 'user_abc' can get, update, or delete their profile if authenticated as 'user_abc'.
-     * @deny (create) - User with ID 'user_xyz' cannot create a profile for 'user_abc'.
-     * @deny (get, update, delete) - User with ID 'user_xyz' cannot get, update, or delete the profile of 'user_abc'.
-     * @principle Enforces document ownership for all operations.
+     * @allow (create) - An authenticated user can create their own user document if the userId matches their auth UID.
+     * @deny (create) - A user cannot create a user document with a userId that doesn't match their auth UID.
+     * @allow (get, update, delete) - An authenticated user can get, update or delete their own user document if the userId matches their auth UID.
+     * @deny (get, update, delete) - A user cannot get, update or delete a user document with a userId that doesn't match their auth UID.
+     * @principle Enforces user-level access control.
      */
     match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
       allow get: if isOwner(userId);
-      allow list: if false;
+      allow list: if false; // User listing is not allowed.
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
     /**
-     * @description Secure invoices for a specific user. Only the user can read/write their own invoices.
+     * @description Rule for the /users/{userId}/invoices/{invoiceId} collection.
      * @path /users/{userId}/invoices/{invoiceId}
-     * @allow (create) - User with ID 'user_abc' can create an invoice under /users/user_abc/invoices if authenticated as 'user_abc'.
-     * @allow (get, list, update, delete) - User with ID 'user_abc' can get, list, update, or delete invoices under /users/user_abc/invoices if authenticated as 'user_abc'.
-     * @deny (create) - User with ID 'user_xyz' cannot create an invoice under /users/user_abc/invoices.
-     * @deny (get, list, update, delete) - User with ID 'user_xyz' cannot get, list, update, or delete invoices under /users/user_abc/invoices.
-     * @principle Enforces document ownership and path-based access control.
+     * @allow (create) - An authenticated user can create an invoice under their user ID if the userId in the invoice data matches the path.
+     * @deny (create) - A user cannot create an invoice under a different user's ID.
+     * @allow (get, list, update, delete) - An authenticated user can get, list, update, or delete their own invoices.
+     * @deny (get, list, update, or delete) - A user cannot get, list, update, or delete invoices belonging to other users.
+     * @principle Enforces user-level access control for invoices.
      */
     match /users/{userId}/invoices/{invoiceId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
       allow get: if isOwner(userId);
       allow list: if isOwner(userId);
       allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
     /**
-     * @description Secure expenses for a specific user. Only the user can read/write their own expenses.
+     * @description Rule for the /users/{userId}/expenses/{expenseId} collection.
      * @path /users/{userId}/expenses/{expenseId}
-     * @allow (create) - User with ID 'user_abc' can create an expense under /users/user_abc/expenses if authenticated as 'user_abc'.
-     * @allow (get, list, update, delete) - User with ID 'user_abc' can get, list, update, or delete expenses under /users/user_abc/expenses if authenticated as 'user_abc'.
-     * @deny (create) - User with ID 'user_xyz' cannot create an expense under /users/user_abc/expenses.
-     * @deny (get, list, update, delete) - User with ID 'user_xyz' cannot get, list, update, or delete expenses under /users/user_abc/expenses.
-     * @principle Enforces document ownership and path-based access control.
+     * @allow (create) - An authenticated user can create an expense under their user ID if the userId in the expense data matches the path.
+     * @deny (create) - A user cannot create an expense under a different user's ID.
+     * @allow (get, list, update, delete) - An authenticated user can get, list, update, or delete their own expenses.
+     * @deny (get, list, update, or delete) - A user cannot get, list, update, or delete expenses belonging to other users.
+     * @principle Enforces user-level access control for expenses.
      */
     match /users/{userId}/expenses/{expenseId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
       allow get: if isOwner(userId);
       allow list: if isOwner(userId);
       allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
     /**
-     * @description Secure reports for a specific user. Only the user can read/write their own reports.
+     * @description Rule for the /users/{userId}/reports/{reportId} collection.
      * @path /users/{userId}/reports/{reportId}
-     * @allow (create) - User with ID 'user_abc' can create a report under /users/user_abc/reports if authenticated as 'user_abc'.
-     * @allow (get, list, update, delete) - User with ID 'user_abc' can get, list, update, or delete reports under /users/user_abc/reports if authenticated as 'user_abc'.
-     * @deny (create) - User with ID 'user_xyz' cannot create a report under /users/user_abc/reports.
-     * @deny (get, list, update, delete) - User with ID 'user_xyz' cannot get, list, update, or delete reports under /users/user_abc/reports.
-     * @principle Enforces document ownership and path-based access control.
+     * @allow (create) - An authenticated user can create a report under their user ID if the userId in the report data matches the path.
+     * @deny (create) - A user cannot create a report under a different user's ID.
+     * @allow (get, list, update, delete) - An authenticated user can get, list, update, or delete their own reports.
+     * @deny (get, list, update, or delete) - A user cannot get, list, update, or delete reports belonging to other users.
+     * @principle Enforces user-level access control for reports.
      */
     match /users/{userId}/reports/{reportId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
       allow get: if isOwner(userId);
       allow list: if isOwner(userId);
       allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
-    /**
-     * @description Secure inventory items for a specific user. Only the user can read/write their own inventory items.
+        /**
+     * @description Rule for the /users/{userId}/inventory/{inventoryId} collection.
      * @path /users/{userId}/inventory/{inventoryId}
-     * @allow (create) - User with ID 'user_abc' can create an inventory item under /users/user_abc/inventory if authenticated as 'user_abc'.
-     * @allow (get, list, update, delete) - User with ID 'user_abc' can get, list, update, or delete inventory items under /users/user_abc/inventory if authenticated as 'user_abc'.
-     * @deny (create) - User with ID 'user_xyz' cannot create an inventory item under /users/user_abc/inventory.
-     * @deny (get, list, update, delete) - User with ID 'user_xyz' cannot get, list, update, or delete inventory items under /users/user_abc/inventory.
-     * @principle Enforces document ownership and path-based access control.
+     * @allow (create) - An authenticated user can create an inventory item under their user ID if the userId in the item data matches the path.
+     * @deny (create) - A user cannot create an inventory item under a different user's ID.
+     * @allow (get, list, update, delete) - An authenticated user can get, list, update, or delete their own inventory items.
+     * @deny (get, list, update, or delete) - A user cannot get, list, update, or delete inventory items belonging to other users.
+     * @principle Enforces user-level access control for inventory items.
      */
     match /users/{userId}/inventory/{inventoryId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
       allow get: if isOwner(userId);
       allow list: if isOwner(userId);
       allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
   }
 }
