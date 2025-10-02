@@ -1,3 +1,4 @@
+
 'use client';
 
 import { DataTable } from '@/components/data-table/data-table';
@@ -56,7 +57,7 @@ export default function InvoicesPage() {
       <DataTable 
         columns={columns} 
         data={isLoadingInvoices ? [] : invoices || []} 
-        searchKey="customer" 
+        searchKey="billedTo" 
         createFormComponent={(props) => (
           <CreateInvoiceForm 
             {...props} 
