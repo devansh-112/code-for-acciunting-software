@@ -28,7 +28,7 @@ const formSchema = z.object({
 
 type CreateExpenseFormProps = {
   setOpen: (open: boolean) => void;
-  onSubmit: (values: Omit<Expense, 'id' | 'userId'>) => void;
+  onSubmit: (values: Omit<Expense, 'id'>) => void;
 };
 
 export function CreateExpenseForm({ setOpen, onSubmit }: CreateExpenseFormProps) {

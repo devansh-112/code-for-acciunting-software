@@ -1,45 +1,59 @@
+
 import { Invoice, Expense, Account, InventoryItem, CompanyDetails } from './types';
 
 export const kpiData = [
   {
     title: 'Total Revenue',
-    value: '₹0',
-    change: '',
+    value: '₹12,45,000',
+    change: '+12.5%',
     icon: 'DollarSign',
   },
   {
     title: 'Total Expenses',
-    value: '₹0',
-    change: '',
+    value: '₹6,80,000',
+    change: '+8.2%',
     icon: 'CreditCard',
   },
   {
     title: 'Net Income',
-    value: '₹0',
-    change: '',
+    value: '₹5,65,000',
+    change: '+15.3%',
     icon: 'BarChart3',
   },
   {
     title: 'Invoices Pending',
-    value: '0',
-    change: '',
+    value: '3',
+    change: '-2',
     icon: 'FileText',
   },
 ];
 
 export const chartData = [
-  { name: 'Jan', income: 0, expense: 0 },
-  { name: 'Feb', income: 0, expense: 0 },
-  { name: 'Mar', income: 0, expense: 0 },
-  { name: 'Apr', income: 0, expense: 0 },
-  { name: 'May', income: 0, expense: 0 },
-  { name: 'Jun', income: 0, expense: 0 },
-  { name: 'Jul', income: 0, expense: 0 },
-  { name: 'Aug', income: 0, expense: 0 },
-  { name: 'Sep', income: 0, expense: 0 },
-  { name: 'Oct', income: 0, expense: 0 },
-  { name: 'Nov', income: 0, expense: 0 },
-  { name: 'Dec', income: 0, expense: 0 },
+  { name: 'Jan', income: 150000, expense: 80000 },
+  { name: 'Feb', income: 180000, expense: 95000 },
+  { name: 'Mar', income: 220000, expense: 110000 },
+  { name: 'Apr', income: 200000, expense: 105000 },
+  { name: 'May', income: 250000, expense: 130000 },
+  { name: 'Jun', income: 280000, expense: 140000 },
+  { name: 'Jul', income: 300000, expense: 160000 },
+  { name: 'Aug', income: 280000, expense: 150000 },
+  { name: 'Sep', income: 320000, expense: 170000 },
+  { name: 'Oct', income: 350000, expense: 180000 },
+  { name: 'Nov', income: 330000, expense: 175000 },
+  { name: 'Dec', income: 400000, expense: 200000 },
+];
+
+export const invoices: Invoice[] = [
+  // Sample invoice data
+];
+export const expenses: Expense[] = [
+  // Sample expense data
+];
+export const accounts: Account[] = [
+    // Sample account data
+];
+export const inventory: InventoryItem[] = [
+    // Sample inventory data
 ];
 
 export let companyDetails: CompanyDetails = {

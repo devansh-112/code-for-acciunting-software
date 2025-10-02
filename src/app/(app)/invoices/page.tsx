@@ -1,48 +1,42 @@
 
 'use client';
 
+import { useState } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
-import { columns } from './columns';
+import { getColumns } from './columns';
+import { invoices as initialInvoices, inventory as initialInventory } from '@/lib/data';
 import { CreateInvoiceForm } from '@/components/forms/create-invoice-form';
 import { Invoice, InventoryItem } from '@/lib/types';
-import { useCollection, useFirebase, useMemoFirebase, useUser } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
-import { addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function InvoicesPage() {
-  const { firestore } = useFirebase();
-  const { user } = useUser();
+  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>(initialInventory);
 
-  const invoicesRef = useMemoFirebase(() => {
-    if (!user) return null;
-    return collection(firestore, `users/${user.uid}/invoices`);
-  }, [firestore, user]);
-
-  const inventoryRef = useMemoFirebase(() => {
-    if (!user) return null;
-    return collection(firestore, `users/${user.uid}/inventory`);
-  }, [firestore, user]);
-
-  const { data: invoices, isLoading: isLoadingInvoices } = useCollection<Invoice>(invoicesRef);
-  const { data: inventoryItems, isLoading: isLoadingInventory } = useCollection<InventoryItem>(inventoryRef);
-
-
-  const addInvoice = (invoice: Omit<Invoice, 'id' | 'userId'>) => {
-    if (!invoicesRef || !inventoryItems || !user) return;
-
+  const addInvoice = (invoice: Omit<Invoice, 'id'>) => {
+    const newInvoice = {
+      ...invoice,
+      id: `INV-${(Math.random() * 1000).toFixed(0).padStart(3, '0')}`,
+    };
+    
     // Update inventory
-    invoice.items.forEach(item => {
-      const inventoryItem = inventoryItems.find(invItem => invItem.sku === item.sku);
-      if (inventoryItem) {
-        const itemRef = doc(firestore, `users/${user.uid}/inventory/${inventoryItem.id}`);
-        const newQuantity = inventoryItem.quantity - item.quantity;
-        updateDocumentNonBlocking(itemRef, { quantity: newQuantity });
+    const updatedInventory = [...inventoryItems];
+    newInvoice.items.forEach(item => {
+      const inventoryItemIndex = updatedInventory.findIndex(invItem => invItem.sku === item.sku);
+      if (inventoryItemIndex > -1) {
+        updatedInventory[inventoryItemIndex].quantity -= item.quantity;
       }
     });
+    setInventoryItems(updatedInventory);
 
-    // Add invoice
-    addDocumentNonBlocking(invoicesRef, { ...invoice, userId: user!.uid });
+    setInvoices([newInvoice, ...invoices]);
   };
+
+  const deleteInvoice = (id: string) => {
+    // Note: This doesn't add back to inventory, for simplicity
+    setInvoices(invoices.filter(invoice => invoice.id !== id));
+  }
+
+  const columns = getColumns(deleteInvoice);
 
   return (
     <div className="flex flex-col gap-8">
@@ -56,15 +50,9 @@ export default function InvoicesPage() {
       </div>
       <DataTable 
         columns={columns} 
-        data={isLoadingInvoices ? [] : invoices || []} 
+        data={invoices} 
         searchKey="billedTo" 
-        createFormComponent={(props) => (
-          <CreateInvoiceForm 
-            {...props} 
-            onSubmit={addInvoice} 
-            inventoryItems={isLoadingInventory ? [] : inventoryItems || []} 
-          />
-        )}
+        createFormComponent={(props) => <CreateInvoiceForm {...props} onSubmit={addInvoice} inventoryItems={inventoryItems} />}
       />
     </div>
   );

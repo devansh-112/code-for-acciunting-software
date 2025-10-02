@@ -1,27 +1,22 @@
+
 'use client';
 
+import { useState } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
 import { columns } from './columns';
+import { expenses as initialExpenses } from '@/lib/data';
 import { CreateExpenseForm } from '@/components/forms/create-expense-form';
 import { Expense } from '@/lib/types';
-import { useCollection, useFirebase, useMemoFirebase, useUser } from '@/firebase';
-import { collection } from 'firebase/firestore';
-import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function ExpensesPage() {
-  const { firestore } = useFirebase();
-  const { user } = useUser();
+  const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
 
-  const expensesRef = useMemoFirebase(() => {
-    if (!user) return null;
-    return collection(firestore, `users/${user.uid}/expenses`);
-  }, [firestore, user]);
-
-  const { data: expenses, isLoading } = useCollection<Expense>(expensesRef);
-
-  const addExpense = (expense: Omit<Expense, 'id' | 'userId'>) => {
-    if (!expensesRef) return;
-    addDocumentNonBlocking(expensesRef, { ...expense, userId: user!.uid });
+  const addExpense = (expense: Omit<Expense, 'id'>) => {
+    const newExpense = {
+      ...expense,
+      id: `EXP-${(Math.random() * 1000).toFixed(0).padStart(3, '0')}`,
+    };
+    setExpenses([...expenses, newExpense]);
   };
 
   return (
@@ -36,7 +31,7 @@ export default function ExpensesPage() {
       </div>
       <DataTable 
         columns={columns} 
-        data={isLoading ? [] : expenses || []} 
+        data={expenses} 
         searchKey="vendor" 
         createFormComponent={(props) => <CreateExpenseForm {...props} onSubmit={addExpense} />} 
       />

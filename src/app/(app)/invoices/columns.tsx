@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
@@ -7,7 +8,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 import { DataTableRowActions } from './data-table-row-actions';
 
-export const columns: ColumnDef<Invoice>[] = [
+// This type is used to define the shape of our data.
+// You can use a Zod schema here if you want.
+
+export const getColumns = (deleteInvoice: (id: string) => void): ColumnDef<Invoice>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -100,6 +104,6 @@ export const columns: ColumnDef<Invoice>[] = [
   },
   {
     id: 'actions',
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    cell: ({ row }) => <DataTableRowActions row={row} deleteInvoice={deleteInvoice} />,
   },
 ];

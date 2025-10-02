@@ -1,27 +1,22 @@
+
 'use client';
 
+import { useState } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
 import { columns } from './columns';
+import { inventory as initialInventory } from '@/lib/data';
 import { CreateInventoryItemForm } from '@/components/forms/create-inventory-item-form';
 import { InventoryItem } from '@/lib/types';
-import { useCollection, useFirebase, useMemoFirebase, useUser } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
-import { addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function InventoryPage() {
-  const { firestore } = useFirebase();
-  const { user } = useUser();
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>(initialInventory);
 
-  const inventoryRef = useMemoFirebase(() => {
-    if (!user) return null;
-    return collection(firestore, `users/${user.uid}/inventory`);
-  }, [firestore, user]);
-
-  const { data: inventoryItems, isLoading } = useCollection<InventoryItem>(inventoryRef);
-
-  const addInventoryItem = (item: Omit<InventoryItem, 'id' | 'userId'>) => {
-    if (!inventoryRef) return;
-    addDocumentNonBlocking(inventoryRef, { ...item, userId: user!.uid });
+  const addInventoryItem = (item: Omit<InventoryItem, 'id'>) => {
+    const newItem = {
+      ...item,
+      id: item.sku, // Use SKU as ID for simplicity in this non-DB version
+    };
+    setInventoryItems([...inventoryItems, newItem]);
   };
 
   return (
@@ -36,7 +31,7 @@ export default function InventoryPage() {
       </div>
       <DataTable 
         columns={columns} 
-        data={isLoading ? [] : inventoryItems || []} 
+        data={inventoryItems} 
         searchKey="name" 
         createFormComponent={(props) => <CreateInventoryItemForm {...props} onSubmit={addInventoryItem} />}
       />

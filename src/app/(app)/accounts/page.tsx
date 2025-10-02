@@ -1,27 +1,22 @@
+
 'use client';
 
+import { useState } from 'react';
 import { DataTable } from '@/components/data-table/data-table';
 import { columns } from './columns';
+import { accounts as initialAccounts } from '@/lib/data';
 import { CreateAccountForm } from '@/components/forms/create-account-form';
 import { Account } from '@/lib/types';
-import { useCollection, useFirebase, useMemoFirebase, useUser } from '@/firebase';
-import { collection } from 'firebase/firestore';
-import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function AccountsPage() {
-  const { firestore } = useFirebase();
-  const { user } = useUser();
+  const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
 
-  const accountsRef = useMemoFirebase(() => {
-    if (!user) return null;
-    return collection(firestore, `users/${user.uid}/accounts`);
-  }, [firestore, user]);
-
-  const { data: accounts, isLoading } = useCollection<Account>(accountsRef);
-
-  const addAccount = (account: Omit<Account, 'id' | 'userId'>) => {
-    if (!accountsRef) return;
-    addDocumentNonBlocking(accountsRef, { ...account, userId: user!.uid });
+  const addAccount = (account: Omit<Account, 'id'>) => {
+    const newAccount = {
+      ...account,
+      id: `ACC-${(Math.random() * 1000).toFixed(0).padStart(3, '0')}`,
+    };
+    setAccounts([...accounts, newAccount]);
   };
 
   return (
@@ -36,7 +31,7 @@ export default function AccountsPage() {
       </div>
       <DataTable 
         columns={columns} 
-        data={isLoading ? [] : accounts || []} 
+        data={accounts} 
         searchKey="name" 
         createFormComponent={(props) => <CreateAccountForm {...props} onSubmit={addAccount} />}
       />

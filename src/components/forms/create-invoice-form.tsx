@@ -53,7 +53,7 @@ const formSchema = z.object({
 
 type CreateInvoiceFormProps = {
   setOpen: (open: boolean) => void;
-  onSubmit: (values: Omit<Invoice, 'id' | 'userId'>) => void;
+  onSubmit: (values: Omit<Invoice, 'id'>) => void;
   inventoryItems: InventoryItem[];
 };
 
@@ -86,7 +86,7 @@ export function CreateInvoiceForm({ setOpen, onSubmit, inventoryItems }: CreateI
   }, [billedToValues, sameAsBilledTo, form]);
 
   function handleFormSubmit(values: z.infer<typeof formSchema>) {
-    onSubmit(values as Omit<Invoice, 'id' | 'userId'>);
+    onSubmit(values as Omit<Invoice, 'id'>);
     form.reset();
     setOpen(false);
   }

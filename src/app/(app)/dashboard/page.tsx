@@ -1,8 +1,9 @@
+
 'use client';
 
 import { StatCard } from '@/components/stat-card';
 import { OverviewChart } from '@/components/overview-chart';
-import { kpiData as initialKpiData } from '@/lib/data';
+import { kpiData, invoices as initialInvoices, expenses as initialExpenses } from '@/lib/data';
 import * as Icons from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -21,46 +22,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useCollection, useFirebase, useMemoFirebase, useUser } from '@/firebase';
-import { collection } from 'firebase/firestore';
-import { Invoice, Expense } from '@/lib/types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export default function DashboardPage() {
-  const { firestore } = useFirebase();
-  const { user } = useUser();
-  const [kpiData, setKpiData] = useState(initialKpiData);
+  const [invoices, setInvoices] = useState(initialInvoices);
 
-  const invoicesRef = useMemoFirebase(() => {
-    if (!user) return null;
-    return collection(firestore, `users/${user.uid}/invoices`);
-  }, [firestore, user]);
-
-  const expensesRef = useMemoFirebase(() => {
-    if (!user) return null;
-    return collection(firestore, `users/${user.uid}/expenses`);
-  }, [firestore, user]);
-
-  const { data: invoices } = useCollection<Invoice>(invoicesRef);
-  const { data: expenses } = useCollection<Expense>(expensesRef);
-
-  useEffect(() => {
-    if (invoices && expenses) {
-      const totalRevenue = invoices.reduce((sum, inv) => sum + inv.items.reduce((itemSum, item) => itemSum + item.price * item.quantity, 0), 0);
-      const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-      const netIncome = totalRevenue - totalExpenses;
-      const pendingInvoices = invoices.filter(inv => inv.status === 'pending').length;
-
-      setKpiData([
-        { title: 'Total Revenue', value: new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(totalRevenue), change: '', icon: 'DollarSign' },
-        { title: 'Total Expenses', value: new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(totalExpenses), change: '', icon: 'CreditCard' },
-        { title: 'Net Income', value: new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(netIncome), change: '', icon: 'BarChart3' },
-        { title: 'Invoices Pending', value: pendingInvoices.toString(), change: '', icon: 'FileText' },
-      ]);
-    }
-  }, [invoices, expenses]);
-
-  const recentInvoices = invoices?.slice(0, 5) || [];
+  const recentInvoices = invoices.slice(0, 5);
 
   return (
     <div className="flex flex-col gap-8">
