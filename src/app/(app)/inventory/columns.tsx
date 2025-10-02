@@ -56,9 +56,9 @@ export const columns: ColumnDef<InventoryItem>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue('price'));
-      const formatted = new Intl.NumberFormat('en-US', {
+      const formatted = new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'INR',
       }).format(amount);
 
       return <div className="text-right font-medium">{formatted}</div>;
@@ -73,9 +73,9 @@ export const columns: ColumnDef<InventoryItem>[] = [
        const price = parseFloat(row.getValue('price'));
        const quantity = parseFloat(row.getValue('quantity'));
        const amount = price * quantity;
-       const formatted = new Intl.NumberFormat('en-US', {
+       const formatted = new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'INR',
       }).format(amount);
 
       return <div className="text-right font-medium">{formatted}</div>;

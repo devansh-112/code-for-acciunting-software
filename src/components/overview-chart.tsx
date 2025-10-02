@@ -25,7 +25,7 @@ export function OverviewChart() {
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `$${value / 1000}k`}
+              tickFormatter={(value) => `₹${value / 1000}k`}
             />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
@@ -34,6 +34,7 @@ export function OverviewChart() {
                 border: '1px solid hsl(var(--border))',
                 borderRadius: 'var(--radius)'
               }}
+              formatter={(value: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value)}
             />
             <Bar dataKey="income" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} name="Income" />
             <Bar dataKey="expense" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="Expense"/>

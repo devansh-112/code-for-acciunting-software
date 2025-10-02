@@ -1,3 +1,5 @@
+'use client';
+
 import { StatCard } from '@/components/stat-card';
 import { OverviewChart } from '@/components/overview-chart';
 import { kpiData } from '@/lib/data';
@@ -20,9 +22,14 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { invoices } from '@/lib/data';
+import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
-  const recentInvoices = invoices.slice(0, 5);
+  const [recentInvoices, setRecentInvoices] = useState(invoices.slice(0, 5));
+
+  useEffect(() => {
+    setRecentInvoices(invoices.slice(0, 5));
+  }, []);
 
   return (
     <div className="flex flex-col gap-8">
@@ -52,40 +59,46 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentInvoices.map((invoice) => (
-                  <TableRow key={invoice.id}>
-                    <TableCell>
-                      <div className="font-medium">{invoice.customer}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {invoice.email}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          invoice.status === 'paid' ? 'secondary' : invoice.status === 'pending' ? 'outline' : 'destructive'
-                        }
-                        className="capitalize"
-                      >
-                        {invoice.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      ${invoice.amount.toFixed(2)}
-                    </TableCell>
+             {recentInvoices.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {recentInvoices.map((invoice) => (
+                    <TableRow key={invoice.id}>
+                      <TableCell>
+                        <div className="font-medium">{invoice.customer}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {invoice.email}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            invoice.status === 'paid' ? 'secondary' : invoice.status === 'pending' ? 'outline' : 'destructive'
+                          }
+                          className="capitalize"
+                        >
+                          {invoice.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                         {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(invoice.amount)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+             ) : (
+                <div className="flex items-center justify-center h-48 text-muted-foreground">
+                  No recent invoices.
+                </div>
+             )}
           </CardContent>
         </Card>
       </div>
