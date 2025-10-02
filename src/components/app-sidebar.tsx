@@ -35,7 +35,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border/50">
+    <Sidebar collapsible="icon" className="border-r border-border/50 hidden md:block">
       <SidebarHeader>
         <div className="flex h-12 items-center px-2 group-data-[collapsible=icon]:justify-center">
             <Logo />

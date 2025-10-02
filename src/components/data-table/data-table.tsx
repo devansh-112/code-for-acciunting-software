@@ -28,12 +28,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey: string;
+  createFormComponent?: React.ComponentType;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
+  createFormComponent: CreateFormComponent,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -55,7 +57,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} searchKey={searchKey} />
+      <DataTableToolbar table={table} searchKey={searchKey} createFormComponent={CreateFormComponent} />
       <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>

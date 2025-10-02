@@ -1,6 +1,7 @@
 import { DataTable } from '@/components/data-table/data-table';
 import { invoices } from '@/lib/data';
 import { columns } from './columns';
+import { CreateInvoiceForm } from '@/components/forms/create-invoice-form';
 
 export default function InvoicesPage() {
   return (
@@ -13,7 +14,7 @@ export default function InvoicesPage() {
           Create and manage customer invoices.
         </p>
       </div>
-      <DataTable columns={columns} data={invoices} searchKey="customer" />
+      <DataTable columns={columns} data={invoices} searchKey="customer" createFormComponent={CreateInvoiceForm} />
     </div>
   );
 }

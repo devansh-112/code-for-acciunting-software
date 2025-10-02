@@ -5,6 +5,7 @@ import { Invoice } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { DataTableRowActions } from './data-table-row-actions';
 
 export const columns: ColumnDef<Invoice>[] = [
   {
@@ -94,5 +95,9 @@ export const columns: ColumnDef<Invoice>[] = [
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ];

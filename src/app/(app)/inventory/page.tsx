@@ -1,6 +1,7 @@
 import { DataTable } from '@/components/data-table/data-table';
 import { inventoryItems } from '@/lib/data';
 import { columns } from './columns';
+import { CreateInventoryItemForm } from '@/components/forms/create-inventory-item-form';
 
 export default function InventoryPage() {
   return (
@@ -13,7 +14,7 @@ export default function InventoryPage() {
           Track and manage your product inventory.
         </p>
       </div>
-      <DataTable columns={columns} data={inventoryItems} searchKey="name" />
+      <DataTable columns={columns} data={inventoryItems} searchKey="name" createFormComponent={CreateInventoryItemForm} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { DataTable } from '@/components/data-table/data-table';
 import { expenses } from '@/lib/data';
 import { columns } from './columns';
+import { CreateExpenseForm } from '@/components/forms/create-expense-form';
 
 export default function ExpensesPage() {
   return (
@@ -13,7 +14,7 @@ export default function ExpensesPage() {
           Track and manage your business expenses.
         </p>
       </div>
-      <DataTable columns={columns} data={expenses} searchKey="vendor" />
+      <DataTable columns={columns} data={expenses} searchKey="vendor" createFormComponent={CreateExpenseForm} />
     </div>
   );
 }

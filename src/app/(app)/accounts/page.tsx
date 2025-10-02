@@ -1,6 +1,7 @@
 import { DataTable } from '@/components/data-table/data-table';
 import { accounts } from '@/lib/data';
 import { columns } from './columns';
+import { CreateAccountForm } from '@/components/forms/create-account-form';
 
 export default function AccountsPage() {
   return (
@@ -13,7 +14,7 @@ export default function AccountsPage() {
           Manage your assets, liabilities, equity, revenue, and expenses.
         </p>
       </div>
-      <DataTable columns={columns} data={accounts} searchKey="name" />
+      <DataTable columns={columns} data={accounts} searchKey="name" createFormComponent={CreateAccountForm} />
     </div>
   );
 }
